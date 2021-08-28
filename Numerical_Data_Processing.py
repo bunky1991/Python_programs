@@ -30,20 +30,20 @@ class Data_Processing:
         self.check_data()
         self.column_names = self.columns()
         self.data_type = self.check_type()
-        """if self.dataset_usable:
+        self.dataset_usable = self.dataset_use_ability
+        if self.dataset_usable:
             print("Dataset is useable, please proceed")
         elif self.dataset_usable == None:
             print("A error occured during checking functions for data useability.")
         else:
-            print("Dataset return false, please check dataset is a formatted correctly")"""
+            print("Dataset return false, please check dataset is a formatted correctly")
         self.save_preTrained_location = "/content/drive/My Drive/Colab Notebooks/Dissertation/Tensorflow_DataSets/Sorted_Data/"
         self.sorted = False
         self.extracted_features = None
         self.extracted_targets = None
         self.features_and_targets()
-        #self.dataset_usable = self.dataset_use_ability
-        #if sorted:
-           #self.save_to_csv()
+        if sorted:
+           self.save_to_csv()
  
     def __str__(self) -> str:
         """
