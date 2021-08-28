@@ -156,6 +156,10 @@ class Data_Processing:
             return None
     
     def convert_string_columns(self, column_to_change: str) -> None:
+        """
+        :param column_to_change: with come intot he function as a string valued column, then returned a integer
+        :return: None
+        """
         unique_values = self.dataframe[column_to_change].unique()
         for index, word in enumerate(unique_values):
             self.dataframe[column_to_change] = self.dataframe[column_to_change].replace([word],index)
