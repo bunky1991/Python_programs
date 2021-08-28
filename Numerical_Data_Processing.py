@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import numpy as np
@@ -8,30 +9,43 @@ import matplotlib.pyplot as plt
 class Data_Processing:
     def __init__(self, location: str, file_name: str) -> None:
         """ 
-        :param file_name: name of the file 
+        :param file_name: name of the file
         :param location: Location where file is stored
         :param dataframe: file opened into dataframe
+        :param check_data: checks if the data type is numerical
         :param column_names: list of names of columns in the dataframe 
         :param data_type: Data type of the data
         :param save_preTrained_location: location to save sorted dataframe
         :param sorted: If data has been sorted 
+        :param extracted_features: creates new features form the existing data
+        :param extracted_targets: creates targets
+        :param features_and_targets: call function to fill previous 2 parameters
+        :param dataset_usable: This returns True or false whether the data can be used.
+        :param save_to_csv: Saved sorted dataframe to a new csv file
         :return: None
         """
-        self.file_name =  file_name.replace(".csv", "") if ".csv" in file_name else file_name
         self.location = location
         self.dataframe = self.Load_DataSet()
+        self.file_name = file_name.replace(".csv", "") if ".csv" in file_name else file_name
         self.check_data()
         self.column_names = self.columns()
         self.data_type = self.check_type()
-        self.save_preTrained_location = "dir location"
+        """if self.dataset_usable:
+            print("Dataset is useable, please proceed")
+        elif self.dataset_usable == None:
+            print("A error occured during checking functions for data useability.")
+        else:
+            print("Dataset return false, please check dataset is a formatted correctly")"""
+        self.save_preTrained_location = "/content/drive/My Drive/Colab Notebooks/Dissertation/Tensorflow_DataSets/Sorted_Data/"
         self.sorted = False
         self.extracted_features = None
         self.extracted_targets = None
         self.features_and_targets()
-        if sorted:
-            self.save_to_csv()
-  
-  def __str__(self) -> str:
+        #self.dataset_usable = self.dataset_use_ability
+        #if sorted:
+           #self.save_to_csv()
+ 
+    def __str__(self) -> str:
         """
         Prints a description of the class object
         :return: string of Details of object 
@@ -40,16 +54,40 @@ class Data_Processing:
             return f"Data information:\nLocation: {self.location}\ndata type: {self.data_type}\nfile name: {self.file_name}\nNumber of columns: {len(self.column_names)}\nAmount of rows: {self.dataframe.shape[0]}\n"
         else:
             return f"Data information:\nLocation: {self.location}\ndata type: The columns that are numerical are {self.data_type}\nfile name: {self.file_name}\nNumber of columns: {len(self.column_names)}\nAmount of rows: {self.dataframe.shape[0]}\n"
- 
-  def Load_DataSet(self) -> pd.DataFrame:
+        
+    def dataset_use_ability() -> bool or None:
+        issue_list = []
+        try:
+            issue_list.append("dataframe" if self.dataframe == None else None)
+            issue_list.append("check_type" if self.data_type == None else None) 
+            issue_list.append("check_data" if self.column_names == None else None)
+            isses_list.append("column_names" if self.check_data == None else None)
+            if self.check_type or self.check_data or self.column_names == None:
+                print(f"Dataset is not usable in this state: Issue with {x for x in issue_list if x != None}")
+                return False
+            else:
+                print("No issues have been found")
+                return True
+        except:
+            print("Unknown error: dataset_use_ability")
+            return None
+
+    def Load_DataSet(self) -> pd.DataFrame or None:
         """
-        Just opens the csv file with pandas
-        :return: returns data loaded with pandas
+        Opens the csv file with pandas and is returned a dataframe
+        :return: returns data loaded using pandas
         """
-        file = pd.read_csv(self.location)
-        return file
+        try:
+            file = pd.read_csv(self.location)
+            return file
+        except FileNotFoundError:
+            print(f"The file in {self.loaction} does not exist.")
+            return None
+        except:
+            print("Load_DataSet: Error not accounted for.")
+            return None
  
-    def check_type(self, is_numeric=None) -> str or [str]:
+    def check_type(self, is_numeric=None) -> str or [str] or None:
         """
         :param is_numeric: True or False if column is numerical in dataframe
         :return: Will return a string if all data is numerical, otherwise will return a list with all the column names that can be used
@@ -61,7 +99,11 @@ class Data_Processing:
                 if is_numeric_dtype(self.dataframe[self.column_names[i]]):
                     is_numeric.append(True)
                 else:
-                    self.dataframe = self.dataframe.drop(columns=self.column_names[i])  
+                    self.convert_string_columns(self.column_names[i])
+                    if is_numeric_dtype(self.dataframe[self.column_names[i]]):
+                        is_numeric.append(True)
+                    else:
+                        self.dataframe = self.dataframe.drop(columns=self.column_names[i]) 
             if all(is_numeric):
                 return "Numerical"
             else:
@@ -77,10 +119,9 @@ class Data_Processing:
             print(f"Check_Type: Value Error: 2:\nIssue is with {print(self)}")
             return None
         except:
-            print("Check_Type: Unknown Error: 3: Issues not accounted for.")
+            print("Check_Type: Unknown Error: 3: Issue not accounted for.")
             return None
         
- 
     def save_to_csv(self) -> None:
         """
         Saves the sorted data frame as a new csv
@@ -113,17 +154,22 @@ class Data_Processing:
         except:
             print("Unknon Error 2: function name: columns:")
             return None
- 
+    
+    def convert_string_columns(self, column_to_change: str) -> None:
+        unique_values = self.dataframe[column_to_change].unique()
+        for index, word in enumerate(unique_values):
+            self.dataframe[column_to_change] = self.dataframe[column_to_change].replace([word],index)
+        print(f"Converted string's to integer's in {self.file_name}. Column name {column_to_change}")
+        print(f"{column_to_change} was {unique_values}")
+        print(f"{column_to_change} now {self.dataframe[column_to_change].unique()}")
+
+
     def check_data(self) -> pd.DataFrame or None:
         """
-        Used to check the data has no NaN/Null's
-        :return: New dataframe containing no null's or returns None
+        Used to check the data has no NaN/Null's, then will remove them and and will return a new dataframe.
+        :return: either the original dataframe or new dataframe containing no null's or returns None
         """
-        #if a row has a null then the row will be removed, same proccess to all dataset's to make it fair
         try:
-            #for i in self.dataframe.index:
-                #if (self.dataframe.loc[i].isnull().sum() != 0):
-                    #print('Missing value at ', i)
             if (self.dataframe.isnull().values.ravel().sum()) > 0:
                 print(f"The amount of NaN/Null's in the data is {(self.dataframe.isnull().values.ravel().sum())}")
                 dataframe2 = self.dataframe.dropna()
@@ -134,11 +180,14 @@ class Data_Processing:
                     print("There are NaN/Null's that cant be removed this way.\nPlease do it manually.")
                     userinput = input("Would you like to continue: Y or N").upper()
                     if userinput == "Y":
+                        self.sorted = True
                         return dataframe2
                     elif userinput == "N":
+                        self.sorted = False
                         return None
                     else:
                         print("The option you chose was not in the choice. Default action: stopping")
+                        self.sorted = False
                         return None
             else:
                 print(f"There are no nulls in the data.")
@@ -146,23 +195,36 @@ class Data_Processing:
                 return self.dataframe
         except FileNotFoundError:
             print(":File not found:")
+            self.sorted = False
             return None
         except TypeError:
             print("Please check the data, there is a type error. ")
+            self.sorted = False
             return None
         except:
             print("Check_data: Unknown Error 1:")
+            self.sorted = False
             return None
     
     def features_and_targets(self) -> None:
         """
-        extracted_features will have a type of pandas.core.frame.DataFrame
-        extracted_targets will have a type pandas.core.series.Series
+        :param extracted_features: will have a type of pandas.core.frame.DataFrame
+        :param extracted_targets: will have a type pandas.core.series.Series
         :return: None
         """
         try:
-            self.extracted_features = self.dataframe.loc[:, self.dataframe.columns != 'target']
-            self.extracted_targets = self.dataframe.iloc[:, -1]
+            print("Choose a column: ", end=" ")
+            for name in self.column_names:
+                print(f"{name}", end=", ")
+            while True:
+                user_input = str(input("Enter column ->> "))
+                if user_input in self.column_names:
+                    self.extracted_features = self.dataframe.loc[:, self.dataframe.columns != user_input]
+                    self.extracted_targets = self.dataframe.iloc[:, -1]
+                    print(f"feature extraction {self.features_and_targets}")
+                    break
+                else:
+                    print("The column chosen is not in the list, please try again. ")
         except TyprError:
             print("features_and_targets: Type error: 1")
         except ValueError:
@@ -219,12 +281,10 @@ class Data_Processing:
                                   print("that is not a column in this data")
                             boxplot = self.dataframe.boxplot(column=columns_to_show)
                             plt.show()
-                            break
-                            
+                            break            
                         else:
                             print("""you have eneterd a number that is larger 
                                       than the amount of columns you have availbe""")
-                
                 user_choice = input("Try again: Y or N")
                 if user_choice == "Y":
                     continue
