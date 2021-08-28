@@ -208,6 +208,7 @@ class Data_Processing:
     
     def features_and_targets(self) -> None:
         """
+        This function is finding out from the user which 
         :param extracted_features: will have a type of pandas.core.frame.DataFrame
         :param extracted_targets: will have a type pandas.core.series.Series
         :return: None
@@ -216,15 +217,26 @@ class Data_Processing:
             print("Choose a column: ", end=" ")
             for name in self.column_names:
                 print(f"{name}", end=", ")
+            columns_NOT_use = []
             while True:
-                user_input = str(input("Enter column ->> "))
-                if user_input in self.column_names:
-                    self.extracted_features = self.dataframe.loc[:, self.dataframe.columns != user_input]
-                    self.extracted_targets = self.dataframe.iloc[:, -1]
-                    print(f"feature extraction {self.features_and_targets}")
-                    break
-                else:
-                    print("The column chosen is not in the list, please try again. ")
+                amount_of_features = int(input("How many faetures are being used: "))
+                for i in range(amount_of_features):
+                    while True:
+                        user_input = str(input("Enter column to not use ->> "))
+                        if user_input in self.column_names:
+                            columns_NOT_use.append(user_input)
+                            break
+                        else:
+                            print("Please try again, the column you entered is nto in the list!")
+            self.extracted_features = self.dataframe.loc[:, self.dataframe.columns[x for x in amount_NOT_use]]
+            print("Choose a column: ", end=" ")
+            for name in self.column_names:
+                print(f"{name}", end=", ")
+            columns_NOT_use = []
+            while True:
+                column_target = str(input("Enter target column ->> "))
+                if column_target in self.column_names:
+                    self.extracted_targets = self.dataframe.iloc[:, column_target]
         except TyprError:
             print("features_and_targets: Type error: 1")
         except ValueError:
