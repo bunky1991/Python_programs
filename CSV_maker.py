@@ -35,7 +35,7 @@ def open_csv() -> None:
         except:
             print("Unknown error occured.")
 
-    if doesFileExist == "no":
+    if doesFileExist == "yes":
         fileName = input("Enter new file name: ")
         path = input("Enter file path in the following format: C:\\Desktop\\Folder\\CSVFiles\\")
         try:
