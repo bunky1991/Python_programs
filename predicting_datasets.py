@@ -27,7 +27,7 @@ class data:
     def __str__(self):
         return f"{self.name}"
 
-new = data("sam")
+new = data("Tester")
 print(new)
 
 class dataset_sorting:
